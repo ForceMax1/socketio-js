@@ -1,0 +1,73 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body{margin:0;padding:0;width:100vw;height:100vh;background:#F3F3F3;font-family:'Roboto', 'Helvetica', sans-serif}
+
+      main{position:absolute;top:0;left:0;bottom:0;width:50px;background:#171717}main section{display:block;margin:15px auto;width:30px;height:30px}
+      main .colors{border:1px solid #F3F3F3;position:relative}
+      main .colors .color-picker{display:none;width:200px;height:30px;position:absolute;top:50%;left:30px;-webkit-transform:translateY(-50%);transform:translateY(-50%)}
+      main .colors .color-picker:focus{display:block}main .colors:hover .color-picker{display:block}main .thickness{position:relative;background-color:#F3F3F3}
+      main .thickness::after{content:'';position:absolute;left:50%;top:50%;-webkit-transform:translate(-50%, -50%);transform:translate(-50%, -50%);width:50%;height:50%;border-radius:50%;background:#171717}
+      main .thickness .stroke-weight{display:none;position:absolute;width:auto;height:25px;left:30px;top:50%;-webkit-transform:translateY(-50%);transform:translateY(-50%)}
+      main .thickness .stroke-weight:focus{display:block}main .thickness:hover .stroke-weight{display:block}
+      main .clear{display:block;width:30px;height:30px;margin:0 auto;color:#171717;font-size:20px;font-weight:900;background-color:#FFCE00;border:none;outline:none;cursor:pointer}
+
+      #Chat{margin-left: 75%; display:flex; flex-direction: column; margin-top: 300px;}
+      form { background: #000; padding: 3px; bottom: 0; }
+      form input { border: 0; padding: 10px; width: 90%; margin-right: 0.5%; }
+      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+      #messages { list-style-type: none; padding: 3px;}
+      #messages li {color:black; background-color: green; min-height: 16px;}
+      #messages li:nth-child(odd) { background-color: lightgreen; }
+      #messages li.new_user{background-color: white; color:green;}
+      #messages li.user_left{background-color: white; color:red;}
+    </style>
+  </head>
+  <body>
+    <canvas></canvas>
+    <main>
+      <section id="test"class="colors" style="background:#171717;">
+        <input type="text" class="color-picker" value="#171717"/>
+      </section>
+      <section class="thickness">
+        <input type="number" class="stroke-weight" value="3" />
+      </section>
+      <button class="clear">X</button>
+    </main>
+    <div id="Chat">
+    <ul id="messages"></ul>
+    <form action="" autocomplete="off">
+      <input id="m" /><button>Send</button>
+    </form>
+    </div>
+    <script src="main.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script>
+      $(function () {
+        var socket = io();
+        $('form').submit(function(e){
+          e.preventDefault(); // prevents page reloading
+          socket.emit('chat message', $('#m').val());
+          $('#m').val('');
+          return false;
+        });
+        socket.on('user join', function (msg){
+        $('#messages').append($('<li class="new_user">').text
+          ('Neuer Nutzer ist dem Chat begetreten'));
+        });
+        socket.on('user leave', function (msg){
+        $('#messages').append($('<li class="user_left">').text
+          ('Nutzer hat den Chat verlassen.'));
+        });
+        socket.on('chat message', function(msg){
+          $('#messages').append($('<li>').text(msg));
+        });
+      });
+    </script>
+  
+  </body>
+</html>
